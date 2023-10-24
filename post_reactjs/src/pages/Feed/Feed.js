@@ -8,6 +8,7 @@ import Paginator from '../../components/Paginator/Paginator';
 import Loader from '../../components/Loader/Loader';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import './Feed.css';
+// eslint-disable-next-line
 import post from '../../components/Feed/Post/Post';
 
 class Feed extends Component {
@@ -51,7 +52,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('http://localhost:8080/feed/posts')
+    fetch('http://localhost:8080/feed/posts?page=' + page)
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -118,7 +119,7 @@ class Feed extends Component {
     let url = 'http://localhost:8080/feed/post';
     let method = 'POST';
     if (this.state.editPost) {
-      url = 'http://localhost:8080/feed/post/'+this.state.editPost._id;
+      url = 'http://localhost:8080/feed/post/' + this.state.editPost._id;
       method = 'PUT'
     }
 

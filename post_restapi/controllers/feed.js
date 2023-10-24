@@ -6,9 +6,23 @@ const { validationResult } = require('express-validator');
 const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
+    const currentPage = req.query.page || 1;
+    const perPage = 2;
+    let totalItems;
     Post.find()
+        .countDocuments() // count how many documents in db
+        .then(count => {
+            totalItems = count;
+            return Post.find()
+                .skip((currentPage - 1) * perPage)
+                .limit(perPage);
+        })
         .then(posts => {
-            res.status(200).json({ message: 'Fetched posts successfully', posts: posts });
+            res.status(200).json({
+                message: 'Fetched posts successfully',
+                posts: posts,
+                totalItems: totalItems
+            });
         })
         .catch(err => {
             // error handling
@@ -136,25 +150,25 @@ exports.updatePost = (req, res, next) => {
 exports.deletePost = (req, res, next) => {
     const postId = req.params.postId;
     Post.findById(postId)
-    .then(post => {
-        if (!post) {
-            const error = new Error('Could not find post.');
-            error.statusCode = 404;
-            throw error;
-        }
-        // Check logged in user
-        clearImage(post.imageUrl);
-        return Post.findByIdAndDelete(postId);
-    })
-    .then(result => {
-        res.status(200).json({ message: 'Deleted Post' });
-    })
-    .catch(err => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    });
+        .then(post => {
+            if (!post) {
+                const error = new Error('Could not find post.');
+                error.statusCode = 404;
+                throw error;
+            }
+            // Check logged in user
+            clearImage(post.imageUrl);
+            return Post.findByIdAndDelete(postId);
+        })
+        .then(result => {
+            res.status(200).json({ message: 'Deleted Post' });
+        })
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
 };
 
 const clearImage = filePath => {
