@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -44,12 +45,14 @@ app.use((req, res, next) => { // middleware that set headers on any response tha
 })
 
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => { // error handling middleware 
     console.log(error);
     const status = error.statusCode || 500;
     const message = error.message;
-    res.status(status).json({ message: message });
+    const data = error.data;
+    res.status(status).json({ message: message, data: data });
 })
 
 mongoose.connect(MONGODB_URI)
